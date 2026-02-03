@@ -1,5 +1,6 @@
 //What kinds of tokens does this language recognize?
 //TokenType is the dictionary of possible tags.
+// This is so a token can hold the lexeme type in its metadata
 
 package com.craftinginterpreters.lox;
 

@@ -1,5 +1,5 @@
 // Token is a plain data object.
-
+// information that a token needs to carry around
 
 package com.craftinginterpreters.lox;
 
