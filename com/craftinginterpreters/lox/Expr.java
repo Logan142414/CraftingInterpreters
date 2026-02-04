@@ -1,3 +1,10 @@
+// written Expr file to define the expression hierarchy
+// created abstract base class Expr
+// nested static classes for Binary, Grouping, Literal, and Unary expressions
+// Visitor interface for the visitor pattern
+
+// When adding new expression types, this script will be modified
+
 package com.craftinginterpreters.lox;
 
 import java.util.List;

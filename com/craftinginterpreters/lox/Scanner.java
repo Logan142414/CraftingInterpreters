@@ -1,6 +1,6 @@
 // Make rules for how to break up source code into tokens.
 // Also make rules for what type it is, location, etc
-//and attaches metadata like line number and literal value.
+//and attaches the metadata to each token
 
 package com.craftinginterpreters.lox;
 
@@ -9,16 +9,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// what does this mean?
 import static com.craftinginterpreters.lox.TokenType.*;
 
 class Scanner {
   private final String source;
   private final List<Token> tokens = new ArrayList<>();
+  // keep track of where we are in the source code
   private int start = 0;
   private int current = 0;
   private int line = 1;
   private static final Map<String, TokenType> keywords;
 
+// Initialize the keywords map
   static {
     keywords = new HashMap<>();
     keywords.put("and",    AND);
@@ -43,6 +46,8 @@ class Scanner {
     this.source = source;
   }
 
+  // Storing the raw source code as a string
+  // list called tokens to hold all the tokens we find
   List<Token> scanTokens() {
     while (!isAtEnd()) {
       // We are at the beginning of the next lexeme.
@@ -53,7 +58,8 @@ class Scanner {
     tokens.add(new Token(EOF, "", null, line));
     return tokens;
   }
-      
+  
+  // Once in a number, consume all following digits
   private void number() {
     while (isDigit(peek())) advance();
 
@@ -64,75 +70,51 @@ class Scanner {
 
       while (isDigit(peek())) advance();
     }
-
     addToken(NUMBER, Double.parseDouble(source.substring(start, current)));
   }
 
-
+  //  helper function that tells us if we’ve consumed all the characters
   private boolean isAtEnd() {
     return current >= source.length();
   }
 
+  // helper function that consumes the next character in the source code
   private char advance() {
     return source.charAt(current++);
   }
 
+  // helper function that grabs text of current lexeme and adds a new token to the list
   private void addToken(TokenType type) {
     addToken(type, null);
   }
 
+  // WHAT DOES THIS DO??????
   private void addToken(TokenType type, Object literal) {
     String text = source.substring(start, current);
     tokens.add(new Token(type, text, literal, line));
   }
 
+  // The core method that scans a single token
   private void scanToken() {
     char c = advance();
     switch (c) {
-      case '(':
-        addToken(LEFT_PAREN);
-        break;
-      case ')':
-        addToken(RIGHT_PAREN);
-        break;
-      case '{':
-        addToken(LEFT_BRACE);
-        break;
-      case '}':
-        addToken(RIGHT_BRACE);
-        break;
-      case ',':
-        addToken(COMMA);
-        break;
-      case '.':
-        addToken(DOT);
-        break;
-      case '-':
-        addToken(MINUS);
-        break;
-      case '+':
-        addToken(PLUS);
-        break;
-      case ';':
-        addToken(SEMICOLON);
-        break;
-      case '*':
-        addToken(STAR);
-        break;
+      case '(': addToken(LEFT_PAREN); break;
+      case ')': addToken(RIGHT_PAREN); break;
+      case '{': addToken(LEFT_BRACE); break;
+      case '}': addToken(RIGHT_BRACE); break;
+      case ',': addToken(COMMA); break;
+      case '.': addToken(DOT); break;
+      case '-': addToken(MINUS); break;
+      case '+': addToken(PLUS); break;
+      case ';': addToken(SEMICOLON); break;
+      case '*': addToken(STAR); break;
+      // check following character for two-character tokens                                                                                                                                                                                           
+      case '!': addToken(match('=') ? BANG_EQUAL : BANG); break;
+      case '=': addToken(match('=') ? EQUAL_EQUAL : EQUAL); break;
+      case '<': addToken(match('=') ? LESS_EQUAL : LESS); break;
+      case '>': addToken(match('=') ? GREATER_EQUAL : GREATER); break;
 
-      case '!':
-        addToken(match('=') ? BANG_EQUAL : BANG);
-        break;
-      case '=':
-        addToken(match('=') ? EQUAL_EQUAL : EQUAL);
-        break;
-      case '<':
-        addToken(match('=') ? LESS_EQUAL : LESS);
-        break;
-      case '>':
-        addToken(match('=') ? GREATER_EQUAL : GREATER);
-        break;
-
+      //add division character
       case '/':
         if (match('/')) {
           // A comment goes until the end of the line.
@@ -142,20 +124,24 @@ class Scanner {
         }
         break;
 
+
+      // anything that signals end of token
       case ' ':
       case '\r':
       case '\t':
-        // Ignore whitespace.
         break;
 
+      // track line numbers
       case '\n':
         line++;
         break;
 
+      // string literals
       case '"':
         string();
         break;
 
+      // recognize numbers and identifiers/keywords
       default:
         if (isDigit(c)) {
           number();
@@ -168,9 +154,11 @@ class Scanner {
     }
   }
 
+  // Says it will be identifier until program tells it otherwise
   private void identifier() {
     while (isAlphaNumeric(peek())) advance();
 
+    // See if the identifier is a reserved word
     String text = source.substring(start, current);
     TokenType type = keywords.get(text);
     if (type == null) type = IDENTIFIER;
@@ -178,25 +166,24 @@ class Scanner {
 
   }
 
+  // helper function for tokens that are strings "test"
   private void string() {
     while (peek() != '"' && !isAtEnd()) {
       if (peek() == '\n') line++;
       advance();
     }
-
     if (isAtEnd()) {
       Lox.error(line, "Unterminated string.");
       return;
     }
-
     // The closing ".
     advance();
-
     // Trim the surrounding quotes.
     String value = source.substring(start + 1, current - 1);
     addToken(STRING, value);
   }
 
+  // WHAT DOES THIS DO??????
   private boolean match(char expected) {
     if (isAtEnd()) return false;
     if (source.charAt(current) != expected) return false;
@@ -205,26 +192,31 @@ class Scanner {
     return true;
   }
 
+  // Look at the current character without consuming it
   private char peek() {
     if (isAtEnd()) return '\0';
     return source.charAt(current);
   }
 
+  // Look futher ahead without consuming. to confirm "." in numbers
   private char peekNext() {
     if (current + 1 >= source.length()) return '\0';
     return source.charAt(current + 1);
   }
 
+  // helper function to check if character is a letter or underscore
   private boolean isAlpha(char c) {
     return (c >= 'a' && c <= 'z') ||
            (c >= 'A' && c <= 'Z') ||
             c == '_';
   }
 
+  // helper function to check if character is a letter, underscore, or digit
   private boolean isAlphaNumeric(char c) {
     return isAlpha(c) || isDigit(c);
   }
 
+  // helper function to check if character is a digit
   private boolean isDigit(char c) {
     return c >= '0' && c <= '9';
   }
