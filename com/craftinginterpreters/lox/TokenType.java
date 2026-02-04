@@ -2,6 +2,7 @@
 //TokenType is the dictionary of possible tags.
 // This is so a token can hold the lexeme type in its metadata
 
+// These are terminal symbols in the grammar (can't be broken down further)
 package com.craftinginterpreters.lox;
 
 enum TokenType {
