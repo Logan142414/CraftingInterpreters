@@ -1,3 +1,5 @@
+//A tool to visualize those Expr objects so you can debug your parser.
+
 package com.craftinginterpreters.lox;
 
 class AstPrinter implements Expr.Visitor<String> {

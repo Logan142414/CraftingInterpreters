@@ -1,3 +1,15 @@
+//A productivity tool for you, the language implementer
+//Creates some file called Expr.java
+//^Writes Java source code into that file
+
+// Later in the book you’ll have ~30–40 AST node types.
+// Without GenerateAst, you would manually write:
+// 30–40 classes
+// 30–40 constructors
+// 30–40 accept() methods
+// 30–40 visitor methods
+
+
 package com.craftinginterpreters.tool;
 
 import java.io.IOException;
